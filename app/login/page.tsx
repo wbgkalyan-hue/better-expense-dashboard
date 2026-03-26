@@ -49,8 +49,20 @@ export default function LoginPage() {
       await signInWithGoogle()
       document.cookie = `__session=1; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`
       router.push(redirect)
-    } catch (err) {
-      toast.error("Google sign-in failed")
+    } catch (err: any) {
+      console.error("Google sign-in error:", err)
+      const code = err?.code ?? ""
+      if (code === "auth/popup-closed-by-user") {
+        // User closed the popup — not an error
+      } else if (code === "auth/popup-blocked") {
+        toast.error("Popup blocked by browser. Please allow popups for this site.")
+      } else if (code === "auth/unauthorized-domain") {
+        toast.error("This domain is not authorized in Firebase Console.")
+      } else if (code === "auth/operation-not-allowed") {
+        toast.error("Google sign-in is not enabled. Enable it in Firebase Console → Authentication → Sign-in method.")
+      } else {
+        toast.error(`Google sign-in failed: ${code || err?.message || "Unknown error"}`)
+      }
     } finally {
       setLoading(false)
     }
