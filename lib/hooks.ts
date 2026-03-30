@@ -16,6 +16,8 @@ import type {
   InvestmentTransaction,
   Goal,
   NetworthSnapshot,
+  BankAccount,
+  Asset,
 } from "@/types"
 
 interface QueryState<T> {
@@ -28,7 +30,7 @@ function useFirestore<T>(
   fetcher: (uid: string) => Promise<T>,
   defaultValue: T,
 ) {
-  const { user } = useAuth()
+  const { user, encryptionReady } = useAuth()
   const [state, setState] = useState<QueryState<T>>({
     data: defaultValue,
     loading: true,
@@ -53,7 +55,7 @@ function useFirestore<T>(
     return () => {
       cancelled = true
     }
-  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [user, encryptionReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return state
 }
@@ -67,7 +69,7 @@ export function useBrokerAccounts() {
 }
 
 export function useInvestmentTransactions(brokerAccountId?: string) {
-  const { user } = useAuth()
+  const { user, encryptionReady } = useAuth()
   const [state, setState] = useState<QueryState<InvestmentTransaction[]>>({
     data: [],
     loading: true,
@@ -92,7 +94,7 @@ export function useInvestmentTransactions(brokerAccountId?: string) {
     return () => {
       cancelled = true
     }
-  }, [user, brokerAccountId])
+  }, [user, brokerAccountId, encryptionReady])
 
   return state
 }
@@ -129,4 +131,18 @@ export function useBrokerAccount(id: string) {
   }, [id])
 
   return state
+}
+
+export function useBankAccounts() {
+  return useFirestore<BankAccount[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getBankAccounts(uid)),
+    [],
+  )
+}
+
+export function useAssets() {
+  return useFirestore<Asset[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getAssets(uid)),
+    [],
+  )
 }

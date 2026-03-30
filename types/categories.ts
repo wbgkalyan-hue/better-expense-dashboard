@@ -85,3 +85,19 @@ export const GOAL_TYPE_LABELS: Record<GoalType, string> = {
   [GoalType.INVESTMENT_TARGET]: "Investment Target",
   [GoalType.CUSTOM]: "Custom",
 }
+
+export const BANK_ACCOUNT_TYPE_LABELS: Record<BankAccountType, string> = {
+  [BankAccountType.SAVINGS]: "Savings",
+  [BankAccountType.FD]: "Fixed Deposit",
+  [BankAccountType.RD]: "Recurring Deposit",
+  [BankAccountType.CURRENT]: "Current",
+  [BankAccountType.OTHER]: "Other",
+}
+
+export const ASSET_TYPE_LABELS: Record<AssetType, string> = {
+  [AssetType.PROPERTY]: "Property",
+  [AssetType.VEHICLE]: "Vehicle",
+  [AssetType.GOLD]: "Gold",
+  [AssetType.ELECTRONICS]: "Electronics",
+  [AssetType.OTHER]: "Other",
+}

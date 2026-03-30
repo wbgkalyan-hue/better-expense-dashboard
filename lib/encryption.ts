@@ -1,33 +1,44 @@
 /**
- * Client-side AES-256-GCM encryption/decryption using Web Crypto API.
- * Used to decrypt transaction data fetched from Firestore (stored as ciphertext).
+ * AES-256-GCM encryption with cached session key.
+ *
+ * On sign-in the user's password + a shared per-user salt (stored in
+ * Firestore user_settings) are fed into PBKDF2 to derive a CryptoKey.
+ * The key is cached for the session; the password is kept in sessionStorage
+ * so it survives page reloads within the same tab.
+ *
+ * Wire format: base64( salt[16] + iv[12] + ciphertext+authTag )
+ * This is byte-compatible with the mobile app's @noble/ciphers implementation.
  */
 
 const ALGORITHM = "AES-GCM"
 const KEY_LENGTH = 256
-const IV_LENGTH = 12 // 96 bits recommended for AES-GCM
+const SALT_LENGTH = 16
+const IV_LENGTH = 12
+const PBKDF2_ITERATIONS = 600_000
 
-/**
- * Derive an AES-256 key from a password using PBKDF2.
- */
-export async function deriveKey(
+let cachedKey: CryptoKey | null = null
+let cachedSalt: Uint8Array | null = null
+
+// ---------------------------------------------------------------------------
+// Key derivation
+// ---------------------------------------------------------------------------
+
+async function deriveKey(
   password: string,
-  salt: Uint8Array<ArrayBuffer>,
+  salt: Uint8Array,
 ): Promise<CryptoKey> {
-  const encoder = new TextEncoder()
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    encoder.encode(password),
+    new TextEncoder().encode(password),
     "PBKDF2",
     false,
     ["deriveKey"],
   )
-
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt,
-      iterations: 600_000, // OWASP recommended minimum
+      salt: salt.buffer as ArrayBuffer,
+      iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
     keyMaterial,
@@ -37,76 +48,88 @@ export async function deriveKey(
   )
 }
 
-/**
- * Encrypt plaintext string → base64 encoded ciphertext (iv + salt + ciphertext).
- */
-export async function encrypt(
-  plaintext: string,
-  password: string,
-): Promise<string> {
-  const encoder = new TextEncoder()
-  const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH)) as Uint8Array<ArrayBuffer>
-  const salt = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array<ArrayBuffer>
-  const key = await deriveKey(password, salt)
+// ---------------------------------------------------------------------------
+// Session lifecycle
+// ---------------------------------------------------------------------------
 
+export async function initEncryption(
+  password: string,
+  salt: Uint8Array,
+): Promise<void> {
+  cachedKey = await deriveKey(password, salt)
+  cachedSalt = new Uint8Array(salt)
+}
+
+export function clearEncryption(): void {
+  cachedKey = null
+  cachedSalt = null
+}
+
+export function isEncryptionReady(): boolean {
+  return cachedKey !== null && cachedSalt !== null
+}
+
+// ---------------------------------------------------------------------------
+// Encrypt / Decrypt individual fields
+// ---------------------------------------------------------------------------
+
+export async function encryptField(value: unknown): Promise<string> {
+  if (!cachedKey || !cachedSalt) {
+    throw new Error("Encryption not initialized")
+  }
+  const iv = crypto.getRandomValues(new Uint8Array(IV_LENGTH))
+  const plaintext = new TextEncoder().encode(JSON.stringify(value))
   const ciphertext = await crypto.subtle.encrypt(
     { name: ALGORITHM, iv },
-    key,
-    encoder.encode(plaintext),
+    cachedKey,
+    plaintext,
   )
-
-  // Combine: salt (16) + iv (12) + ciphertext
   const combined = new Uint8Array(
-    salt.length + iv.length + ciphertext.byteLength,
+    SALT_LENGTH + IV_LENGTH + ciphertext.byteLength,
   )
-  combined.set(salt, 0)
-  combined.set(iv, salt.length)
-  combined.set(new Uint8Array(ciphertext), salt.length + iv.length)
-
+  combined.set(cachedSalt, 0)
+  combined.set(iv, SALT_LENGTH)
+  combined.set(new Uint8Array(ciphertext), SALT_LENGTH + IV_LENGTH)
   return btoa(String.fromCharCode(...combined))
 }
 
-/**
- * Decrypt base64 ciphertext → plaintext string.
- */
-export async function decrypt(
-  encoded: string,
-  password: string,
-): Promise<string> {
+export async function decryptField<T>(encoded: string): Promise<T> {
+  if (!cachedKey || !cachedSalt) {
+    throw new Error("Encryption not initialized")
+  }
   const combined = Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0))
+  const salt = combined.slice(0, SALT_LENGTH)
+  const iv = combined.slice(SALT_LENGTH, SALT_LENGTH + IV_LENGTH)
+  const ciphertext = combined.slice(SALT_LENGTH + IV_LENGTH)
 
-  const salt = combined.slice(0, 16)
-  const iv = combined.slice(16, 16 + IV_LENGTH)
-  const ciphertext = combined.slice(16 + IV_LENGTH)
-
-  const key = await deriveKey(password, salt)
+  let key: CryptoKey
+  if (salt.every((b, i) => b === cachedSalt![i])) {
+    key = cachedKey
+  } else {
+    // Data encrypted with a different salt — cannot decrypt without password
+    throw new Error("Salt mismatch — data was encrypted with a different key")
+  }
 
   const plaintext = await crypto.subtle.decrypt(
     { name: ALGORITHM, iv },
     key,
     ciphertext,
   )
-
-  return new TextDecoder().decode(plaintext)
+  return JSON.parse(new TextDecoder().decode(plaintext)) as T
 }
 
-/**
- * Encrypt a JSON-serializable object.
- */
-export async function encryptObject<T>(
-  data: T,
-  password: string,
-): Promise<string> {
-  return encrypt(JSON.stringify(data), password)
+// ---------------------------------------------------------------------------
+// Salt helpers
+// ---------------------------------------------------------------------------
+
+export function generateSalt(): Uint8Array {
+  return crypto.getRandomValues(new Uint8Array(SALT_LENGTH))
 }
 
-/**
- * Decrypt to a JSON object.
- */
-export async function decryptObject<T>(
-  encoded: string,
-  password: string,
-): Promise<T> {
-  const json = await decrypt(encoded, password)
-  return JSON.parse(json) as T
+export function saltToBase64(salt: Uint8Array): string {
+  return btoa(String.fromCharCode(...salt))
+}
+
+export function base64ToSalt(b64: string): Uint8Array {
+  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
 }
