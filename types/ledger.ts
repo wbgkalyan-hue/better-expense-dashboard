@@ -33,28 +33,28 @@ export type FriendsLedgerEntry = {
   updatedAt: string
 }
 
-/** Direction of a partners ledger entry from the user's perspective. */
-export type PartnerLedgerType = "paid" | "received" | "shared"
+/** Direction of a family ledger entry from the user's perspective. */
+export type FamilyLedgerType = "paid" | "received" | "shared"
 
-/** Human-readable labels for {@link PartnerLedgerType}. */
-export const PARTNER_LEDGER_TYPE_LABELS: Record<PartnerLedgerType, string> = {
+/** Human-readable labels for {@link FamilyLedgerType}. */
+export const FAMILY_LEDGER_TYPE_LABELS: Record<FamilyLedgerType, string> = {
   paid: "Paid",
   received: "Received",
   shared: "Shared",
 }
 
 /**
- * A money-exchange record between the user and a {@link Partner}.
+ * A money-exchange record between the user and a {@link FamilyMember}.
  * Financial fields (`amount`, `description`) are encrypted at rest in Firestore.
  */
-export type PartnersLedgerEntry = {
+export type FamilyLedgerEntry = {
   id: string
   userId: string
-  /** FK → `partners` collection. */
-  partnerId: string
-  /** Denormalised display name (encrypted alongside the partner entity). */
-  partnerName?: string
-  type: PartnerLedgerType
+  /** FK → `family_members` collection. */
+  familyMemberId: string
+  /** Denormalised display name (encrypted alongside the family member entity). */
+  familyMemberName?: string
+  type: FamilyLedgerType
   /** Amount exchanged (encrypted). */
   amount: number
   /** Short description of the transaction (encrypted). */

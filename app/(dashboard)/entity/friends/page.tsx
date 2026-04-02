@@ -4,12 +4,15 @@ import { Plus, UserRound, Search, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/lib/auth-context"
 import { useFriends } from "@/lib/hooks"
 import { addFriend } from "@/lib/firestore"
+import { FRIEND_RELATIONSHIP_LABELS } from "@/types"
 import { toast } from "sonner"
 
 export default function EntityFriendsPage() {
@@ -20,8 +23,11 @@ export default function EntityFriendsPage() {
   const [search, setSearch] = useState("")
 
   const [formName, setFormName] = useState("")
+  const [formRelationship, setFormRelationship] = useState("")
   const [formPhone, setFormPhone] = useState("")
   const [formEmail, setFormEmail] = useState("")
+  const [formTags, setFormTags] = useState("")
+  const [formAddress, setFormAddress] = useState("")
   const [formNotes, setFormNotes] = useState("")
 
   const filtered = friends.filter(f =>
@@ -32,16 +38,20 @@ export default function EntityFriendsPage() {
     if (!user || !formName) return
     setSaving(true)
     try {
+      const tags = formTags ? formTags.split(",").map(t => t.trim()).filter(Boolean) : undefined
       await addFriend({
         userId: user.uid,
         name: formName,
+        relationship: (formRelationship || undefined) as any,
         phone: formPhone || undefined,
         email: formEmail || undefined,
+        tags: tags,
+        address: formAddress || undefined,
         notes: formNotes || undefined,
       })
       toast.success("Friend added")
       setDialogOpen(false)
-      setFormName(""); setFormPhone(""); setFormEmail(""); setFormNotes("")
+      setFormName(""); setFormRelationship(""); setFormPhone(""); setFormEmail(""); setFormTags(""); setFormAddress(""); setFormNotes("")
       refetch()
     } catch {
       toast.error("Failed to add friend")
@@ -78,12 +88,31 @@ export default function EntityFriendsPage() {
                 <Input placeholder="Full name" value={formName} onChange={e => setFormName(e.target.value)} />
               </div>
               <div className="grid gap-2">
+                <Label>Relationship</Label>
+                <Select value={formRelationship} onValueChange={setFormRelationship}>
+                  <SelectTrigger><SelectValue placeholder="Select relationship" /></SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(FRIEND_RELATIONSHIP_LABELS).map(([v, l]) => (
+                      <SelectItem key={v} value={v}>{l}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
                 <Label>Phone</Label>
                 <Input placeholder="+91 XXXXX XXXXX" value={formPhone} onChange={e => setFormPhone(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label>Email</Label>
                 <Input type="email" placeholder="email@example.com" value={formEmail} onChange={e => setFormEmail(e.target.value)} />
+              </div>
+              <div className="grid gap-2">
+                <Label>Tags</Label>
+                <Input placeholder="Comma-separated tags (optional)" value={formTags} onChange={e => setFormTags(e.target.value)} />
+              </div>
+              <div className="grid gap-2">
+                <Label>Address</Label>
+                <Input placeholder="Address (optional)" value={formAddress} onChange={e => setFormAddress(e.target.value)} />
               </div>
               <div className="grid gap-2">
                 <Label>Notes</Label>
@@ -129,8 +158,10 @@ export default function EntityFriendsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead>Relationship</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Tags</TableHead>
                   <TableHead>Notes</TableHead>
                 </TableRow>
               </TableHeader>
@@ -138,14 +169,26 @@ export default function EntityFriendsPage() {
                 {filtered.map(f => (
                   <TableRow key={f.id}>
                     <TableCell className="font-medium">{f.name}</TableCell>
+                    <TableCell>
+                      {f.relationship ? (
+                        <Badge variant="secondary">{FRIEND_RELATIONSHIP_LABELS[f.relationship]}</Badge>
+                      ) : "—"}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{f.phone ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{f.email ?? "—"}</TableCell>
+                    <TableCell>
+                      {f.tags && f.tags.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {f.tags.map((tag, i) => <Badge key={i} variant="outline">{tag}</Badge>)}
+                        </div>
+                      ) : "—"}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{f.notes ?? "—"}</TableCell>
                   </TableRow>
                 ))}
                 {filtered.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">No friends found.</TableCell>
+                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">No friends found.</TableCell>
                   </TableRow>
                 )}
               </TableBody>

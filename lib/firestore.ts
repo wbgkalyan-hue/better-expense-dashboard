@@ -540,7 +540,7 @@ export async function deleteLoan(id: string): Promise<void> {
 // Friends (Entity)
 // ---------------------------------------------------------------------------
 
-const FRIEND_SENSITIVE = ["name", "phone", "email"]
+const FRIEND_SENSITIVE = ["name", "phone", "email", "address"]
 
 export async function getFriends(userId: string): Promise<import("@/types").Friend[]> {
   const q = query(collection(db, "friends"), where("userId", "==", userId))
@@ -579,45 +579,45 @@ export async function deleteFriend(id: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Partners (Entity)
+// Family Members (Entity)
 // ---------------------------------------------------------------------------
 
-const PARTNER_SENSITIVE = ["name", "company", "phone", "email"]
+const FAMILY_MEMBER_SENSITIVE = ["name", "phone", "email"]
 
-export async function getPartners(userId: string): Promise<import("@/types").Partner[]> {
-  const q = query(collection(db, "partners"), where("userId", "==", userId))
+export async function getFamilyMembers(userId: string): Promise<import("@/types").FamilyMember[]> {
+  const q = query(collection(db, "family_members"), where("userId", "==", userId))
   const snapshot = await getDocs(q)
   const results = await Promise.all(
     snapshot.docs.map(async (snap) => {
       const raw = { id: snap.id, ...snap.data() }
-      return decryptDoc<import("@/types").Partner>(raw, PARTNER_SENSITIVE)
+      return decryptDoc<import("@/types").FamilyMember>(raw, FAMILY_MEMBER_SENSITIVE)
     }),
   )
-  return results.filter((r): r is import("@/types").Partner => r !== null)
+  return results.filter((r): r is import("@/types").FamilyMember => r !== null)
 }
 
-export async function addPartner(
-  data: Omit<import("@/types").Partner, "id" | "createdAt" | "updatedAt">,
+export async function addFamilyMember(
+  data: Omit<import("@/types").FamilyMember, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
-  const payload = await encryptDoc({ ...data }, PARTNER_SENSITIVE)
+  const payload = await encryptDoc({ ...data }, FAMILY_MEMBER_SENSITIVE)
   payload.createdAt = serverTimestamp()
   payload.updatedAt = serverTimestamp()
-  const ref = await addDoc(collection(db, "partners"), payload)
+  const ref = await addDoc(collection(db, "family_members"), payload)
   return ref.id
 }
 
-export async function updatePartner(
+export async function updateFamilyMember(
   id: string,
-  data: Partial<import("@/types").Partner>,
+  data: Partial<import("@/types").FamilyMember>,
 ): Promise<void> {
-  const payload = await encryptDoc({ ...data }, PARTNER_SENSITIVE)
+  const payload = await encryptDoc({ ...data }, FAMILY_MEMBER_SENSITIVE)
   payload.updatedAt = serverTimestamp()
   if (isEncryptionReady()) payload._encrypted = true
-  await updateDoc(doc(db, "partners", id), payload)
+  await updateDoc(doc(db, "family_members", id), payload)
 }
 
-export async function deletePartner(id: string): Promise<void> {
-  await deleteDoc(doc(db, "partners", id))
+export async function deleteFamilyMember(id: string): Promise<void> {
+  await deleteDoc(doc(db, "family_members", id))
 }
 
 // ---------------------------------------------------------------------------
@@ -665,47 +665,47 @@ export async function deleteFriendsLedgerEntry(id: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Partners Ledger
+// Family Ledger
 // ---------------------------------------------------------------------------
 
-const PARTNERS_LEDGER_SENSITIVE = ["amount", "description"]
+const FAMILY_LEDGER_SENSITIVE = ["amount", "description"]
 
-export async function getPartnersLedger(userId: string): Promise<import("@/types").PartnersLedgerEntry[]> {
-  const q = query(collection(db, "partners_ledger"), where("userId", "==", userId))
+export async function getFamilyLedger(userId: string): Promise<import("@/types").FamilyLedgerEntry[]> {
+  const q = query(collection(db, "family_ledger"), where("userId", "==", userId))
   const snapshot = await getDocs(q)
   const results = await Promise.all(
     snapshot.docs.map(async (snap) => {
       const raw = { id: snap.id, ...snap.data() }
-      return decryptDoc<import("@/types").PartnersLedgerEntry>(raw, PARTNERS_LEDGER_SENSITIVE)
+      return decryptDoc<import("@/types").FamilyLedgerEntry>(raw, FAMILY_LEDGER_SENSITIVE)
     }),
   )
   return results
-    .filter((r): r is import("@/types").PartnersLedgerEntry => r !== null)
+    .filter((r): r is import("@/types").FamilyLedgerEntry => r !== null)
     .sort((a, b) => b.date.localeCompare(a.date))
 }
 
-export async function addPartnersLedgerEntry(
-  data: Omit<import("@/types").PartnersLedgerEntry, "id" | "createdAt" | "updatedAt">,
+export async function addFamilyLedgerEntry(
+  data: Omit<import("@/types").FamilyLedgerEntry, "id" | "createdAt" | "updatedAt">,
 ): Promise<string> {
-  const payload = await encryptDoc({ ...data }, PARTNERS_LEDGER_SENSITIVE)
+  const payload = await encryptDoc({ ...data }, FAMILY_LEDGER_SENSITIVE)
   payload.createdAt = serverTimestamp()
   payload.updatedAt = serverTimestamp()
-  const ref = await addDoc(collection(db, "partners_ledger"), payload)
+  const ref = await addDoc(collection(db, "family_ledger"), payload)
   return ref.id
 }
 
-export async function updatePartnersLedgerEntry(
+export async function updateFamilyLedgerEntry(
   id: string,
-  data: Partial<import("@/types").PartnersLedgerEntry>,
+  data: Partial<import("@/types").FamilyLedgerEntry>,
 ): Promise<void> {
-  const payload = await encryptDoc({ ...data }, PARTNERS_LEDGER_SENSITIVE)
+  const payload = await encryptDoc({ ...data }, FAMILY_LEDGER_SENSITIVE)
   payload.updatedAt = serverTimestamp()
   if (isEncryptionReady()) payload._encrypted = true
-  await updateDoc(doc(db, "partners_ledger", id), payload)
+  await updateDoc(doc(db, "family_ledger", id), payload)
 }
 
-export async function deletePartnersLedgerEntry(id: string): Promise<void> {
-  await deleteDoc(doc(db, "partners_ledger", id))
+export async function deleteFamilyLedgerEntry(id: string): Promise<void> {
+  await deleteDoc(doc(db, "family_ledger", id))
 }
 
 // ---------------------------------------------------------------------------

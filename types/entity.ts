@@ -1,6 +1,17 @@
+/** Predefined relationship categories for a friend. */
+export type FriendRelationship = "colleague" | "neighbor" | "classmate" | "other"
+
+/** Human-readable labels for {@link FriendRelationship}. */
+export const FRIEND_RELATIONSHIP_LABELS: Record<FriendRelationship, string> = {
+  colleague: "Colleague",
+  neighbor: "Neighbor",
+  classmate: "Classmate",
+  other: "Other",
+}
+
 /**
  * A friend contact stored in the user's address book.
- * PII fields (`name`, `phone`, `email`) are encrypted at rest in Firestore.
+ * PII fields (`name`, `phone`, `email`, `address`) are encrypted at rest in Firestore.
  */
 export type Friend = {
   id: string
@@ -11,22 +22,53 @@ export type Friend = {
   phone?: string
   /** Email address (encrypted). */
   email?: string
+  /** Relationship category (colleague, neighbor, etc.). */
+  relationship?: FriendRelationship
+  /** Custom tags for finer categorisation. */
+  tags?: string[]
+  /** Postal / residential address (encrypted). */
+  address?: string
   notes?: string
   createdAt: string
   updatedAt: string
 }
 
+/** Predefined relationship types for a family member. */
+export type FamilyRelationship =
+  | "wife"
+  | "husband"
+  | "son"
+  | "daughter"
+  | "father"
+  | "mother"
+  | "brother"
+  | "sister"
+  | "other"
+
+/** Human-readable labels for {@link FamilyRelationship}. */
+export const FAMILY_RELATIONSHIP_LABELS: Record<FamilyRelationship, string> = {
+  wife: "Wife",
+  husband: "Husband",
+  son: "Son",
+  daughter: "Daughter",
+  father: "Father",
+  mother: "Mother",
+  brother: "Brother",
+  sister: "Sister",
+  other: "Other",
+}
+
 /**
- * A business partner contact stored in the user's address book.
- * PII fields (`name`, `company`, `phone`, `email`) are encrypted at rest in Firestore.
+ * A family member contact stored in the user's address book.
+ * PII fields (`name`, `phone`, `email`) are encrypted at rest in Firestore.
  */
-export type Partner = {
+export type FamilyMember = {
   id: string
   userId: string
-  /** Full name of the partner (encrypted). */
+  /** Full name of the family member (encrypted). */
   name: string
-  /** Company or organisation they belong to (encrypted). */
-  company?: string
+  /** Relationship to the user (wife, husband, son, etc.). */
+  relationship?: FamilyRelationship
   /** Mobile / phone number (encrypted). */
   phone?: string
   /** Email address (encrypted). */

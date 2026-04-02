@@ -11,7 +11,9 @@ import {
   INSURANCE_FREQUENCY_LABELS,
   LOAN_TYPE_LABELS,
   LEDGER_ENTRY_TYPE_LABELS,
-  PARTNER_LEDGER_TYPE_LABELS,
+  FAMILY_LEDGER_TYPE_LABELS,
+  FRIEND_RELATIONSHIP_LABELS,
+  FAMILY_RELATIONSHIP_LABELS,
   PROPERTY_TYPE_LABELS,
   PROPERTY_CATEGORY_LABELS,
 } from "@/types"
@@ -90,17 +92,45 @@ describe("Ledger Entry Types — label completeness", () => {
   })
 })
 
-describe("Partner Ledger Types — label completeness", () => {
+describe("Family Ledger Types — label completeness", () => {
   const expected = ["paid", "received", "shared"]
 
-  it("has a label for every partner ledger type", () => {
+  it("has a label for every family ledger type", () => {
     for (const key of expected) {
-      expect(PARTNER_LEDGER_TYPE_LABELS[key as keyof typeof PARTNER_LEDGER_TYPE_LABELS]).toBeDefined()
+      expect(FAMILY_LEDGER_TYPE_LABELS[key as keyof typeof FAMILY_LEDGER_TYPE_LABELS]).toBeDefined()
     }
   })
 
   it("covers exactly the expected keys", () => {
-    expect(Object.keys(PARTNER_LEDGER_TYPE_LABELS).sort()).toEqual(expected.sort())
+    expect(Object.keys(FAMILY_LEDGER_TYPE_LABELS).sort()).toEqual(expected.sort())
+  })
+})
+
+describe("Friend Relationship Labels — completeness", () => {
+  const expected = ["colleague", "neighbor", "classmate", "other"]
+
+  it("has a label for every relationship type", () => {
+    for (const key of expected) {
+      expect(FRIEND_RELATIONSHIP_LABELS[key as keyof typeof FRIEND_RELATIONSHIP_LABELS]).toBeDefined()
+    }
+  })
+
+  it("covers exactly the expected keys", () => {
+    expect(Object.keys(FRIEND_RELATIONSHIP_LABELS).sort()).toEqual(expected.sort())
+  })
+})
+
+describe("Family Relationship Labels — completeness", () => {
+  const expected = ["wife", "husband", "son", "daughter", "father", "mother", "brother", "sister", "other"]
+
+  it("has a label for every family relationship", () => {
+    for (const key of expected) {
+      expect(FAMILY_RELATIONSHIP_LABELS[key as keyof typeof FAMILY_RELATIONSHIP_LABELS]).toBeDefined()
+    }
+  })
+
+  it("covers exactly the expected keys", () => {
+    expect(Object.keys(FAMILY_RELATIONSHIP_LABELS).sort()).toEqual(expected.sort())
   })
 })
 

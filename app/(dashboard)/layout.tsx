@@ -68,12 +68,12 @@ const NAV_FINANCE = [
 
 const NAV_SOCIAL = [
   { title: "Friends Ledger",  href: "/friends-ledger",  icon: Users },
-  { title: "Partners Ledger", href: "/partners-ledger", icon: Handshake },
+  { title: "Family Ledger",   href: "/family-ledger",   icon: Handshake },
 ]
 
 const NAV_ENTITY = [
   { title: "Friends",  href: "/entity/friends",  icon: UserRound },
-  { title: "Partners", href: "/entity/partners", icon: Handshake },
+  { title: "Family",   href: "/entity/family",   icon: Handshake },
 ]
 
 const NAV_MORE = [

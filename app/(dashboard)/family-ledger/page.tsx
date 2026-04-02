@@ -1,6 +1,6 @@
 "use client"
 import { useState, useMemo } from "react"
-import { Plus, Handshake, Loader2 } from "lucide-react"
+import { Plus, Heart, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,25 +10,25 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/lib/auth-context"
-import { usePartnersLedger, usePartners } from "@/lib/hooks"
-import { addPartnersLedgerEntry, updatePartnersLedgerEntry } from "@/lib/firestore"
-import { PARTNER_LEDGER_TYPE_LABELS, type PartnerLedgerType } from "@/types"
+import { useFamilyLedger, useFamilyMembers } from "@/lib/hooks"
+import { addFamilyLedgerEntry, updateFamilyLedgerEntry } from "@/lib/firestore"
+import { FAMILY_LEDGER_TYPE_LABELS, type FamilyLedgerType } from "@/types"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount)
 }
 
-export default function PartnersLedgerPage() {
+export default function FamilyLedgerPage() {
   const { user } = useAuth()
-  const { data: entries, loading, refetch } = usePartnersLedger()
-  const { data: partners } = usePartners()
+  const { data: entries, loading, refetch } = useFamilyLedger()
+  const { data: familyMembers } = useFamilyMembers()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const [formPartnerId, setFormPartnerId] = useState("")
-  const [formPartnerName, setFormPartnerName] = useState("")
-  const [formType, setFormType] = useState<PartnerLedgerType>("paid")
+  const [formMemberId, setFormMemberId] = useState("")
+  const [formMemberName, setFormMemberName] = useState("")
+  const [formType, setFormType] = useState<FamilyLedgerType>("paid")
   const [formAmount, setFormAmount] = useState("")
   const [formDescription, setFormDescription] = useState("")
   const [formDate, setFormDate] = useState(new Date().toISOString().slice(0, 10))
@@ -41,12 +41,12 @@ export default function PartnersLedgerPage() {
   async function handleSave() {
     if (!user || !formAmount || !formDescription || !formDate) return
     setSaving(true)
-    const selectedPartner = partners.find(p => p.id === formPartnerId)
+    const selectedMember = familyMembers.find(m => m.id === formMemberId)
     try {
-      await addPartnersLedgerEntry({
+      await addFamilyLedgerEntry({
         userId: user.uid,
-        partnerId: formPartnerId || "unknown",
-        partnerName: selectedPartner?.name ?? formPartnerName,
+        familyMemberId: formMemberId || "unknown",
+        familyMemberName: selectedMember?.name ?? formMemberName,
         type: formType,
         amount: Number(formAmount),
         description: formDescription,
@@ -55,7 +55,7 @@ export default function PartnersLedgerPage() {
       })
       toast.success("Entry added")
       setDialogOpen(false)
-      setFormPartnerId(""); setFormPartnerName(""); setFormAmount(""); setFormDescription("")
+      setFormMemberId(""); setFormMemberName(""); setFormAmount(""); setFormDescription("")
       refetch()
     } catch {
       toast.error("Failed to add entry")
@@ -66,7 +66,7 @@ export default function PartnersLedgerPage() {
 
   async function handleSettle(id: string) {
     try {
-      await updatePartnersLedgerEntry(id, { settled: true, settledDate: new Date().toISOString().slice(0, 10) })
+      await updateFamilyLedgerEntry(id, { settled: true, settledDate: new Date().toISOString().slice(0, 10) })
       toast.success("Marked as settled")
       refetch()
     } catch {
@@ -84,8 +84,8 @@ export default function PartnersLedgerPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Partners Ledger</h1>
-          <p className="text-muted-foreground">Track shared expenses and payments with partners</p>
+          <h1 className="text-2xl font-bold tracking-tight">Family Ledger</h1>
+          <p className="text-muted-foreground">Track shared expenses and payments with family members</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -98,25 +98,25 @@ export default function PartnersLedgerPage() {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label>Partner</Label>
-                {partners.length > 0 ? (
-                  <Select value={formPartnerId} onValueChange={setFormPartnerId}>
-                    <SelectTrigger><SelectValue placeholder="Select partner" /></SelectTrigger>
+                <Label>Family Member</Label>
+                {familyMembers.length > 0 ? (
+                  <Select value={formMemberId} onValueChange={setFormMemberId}>
+                    <SelectTrigger><SelectValue placeholder="Select family member" /></SelectTrigger>
                     <SelectContent>
-                      {partners.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      {familyMembers.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 ) : (
-                  <Input placeholder="Partner name" value={formPartnerName} onChange={e => setFormPartnerName(e.target.value)} />
+                  <Input placeholder="Family member name" value={formMemberName} onChange={e => setFormMemberName(e.target.value)} />
                 )}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="grid gap-2">
                   <Label>Type</Label>
-                  <Select value={formType} onValueChange={v => setFormType(v as PartnerLedgerType)}>
+                  <Select value={formType} onValueChange={v => setFormType(v as FamilyLedgerType)}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {Object.entries(PARTNER_LEDGER_TYPE_LABELS).map(([v, l]) => (
+                      {Object.entries(FAMILY_LEDGER_TYPE_LABELS).map(([v, l]) => (
                         <SelectItem key={v} value={v}>{l}</SelectItem>
                       ))}
                     </SelectContent>
@@ -150,13 +150,13 @@ export default function PartnersLedgerPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Net Position</CardTitle>
-            <Handshake className="h-4 w-4 text-muted-foreground" />
+            <Heart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${netPosition >= 0 ? "text-green-500" : "text-red-500"}`}>
               {netPosition >= 0 ? "+" : ""}{formatCurrency(netPosition)}
             </div>
-            <p className="text-xs text-muted-foreground">{netPosition >= 0 ? "You are owed" : "You owe partners"}</p>
+            <p className="text-xs text-muted-foreground">{netPosition >= 0 ? "You are owed" : "You owe family"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -183,7 +183,7 @@ export default function PartnersLedgerPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Partner</TableHead>
+                  <TableHead>Family Member</TableHead>
                   <TableHead>Type</TableHead>
                   <TableHead>Description</TableHead>
                   <TableHead>Amount</TableHead>
@@ -195,10 +195,10 @@ export default function PartnersLedgerPage() {
               <TableBody>
                 {entries.map(e => (
                   <TableRow key={e.id}>
-                    <TableCell className="font-medium">{e.partnerName ?? e.partnerId}</TableCell>
+                    <TableCell className="font-medium">{e.familyMemberName ?? e.familyMemberId}</TableCell>
                     <TableCell>
                       <Badge variant={e.type === "paid" ? "default" : e.type === "received" ? "secondary" : "outline"}>
-                        {PARTNER_LEDGER_TYPE_LABELS[e.type]}
+                        {FAMILY_LEDGER_TYPE_LABELS[e.type]}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{e.description}</TableCell>

@@ -181,9 +181,9 @@ export function useFriends() {
   )
 }
 
-export function usePartners() {
-  return useFirestore<import("@/types").Partner[]>(
-    (uid) => import("@/lib/firestore").then((m) => m.getPartners(uid)),
+export function useFamilyMembers() {
+  return useFirestore<import("@/types").FamilyMember[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getFamilyMembers(uid)),
     [],
   )
 }
@@ -195,9 +195,9 @@ export function useFriendsLedger() {
   )
 }
 
-export function usePartnersLedger() {
-  return useFirestore<import("@/types").PartnersLedgerEntry[]>(
-    (uid) => import("@/lib/firestore").then((m) => m.getPartnersLedger(uid)),
+export function useFamilyLedger() {
+  return useFirestore<import("@/types").FamilyLedgerEntry[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getFamilyLedger(uid)),
     [],
   )
 }

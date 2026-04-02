@@ -51,9 +51,9 @@ import {
   getCreditCards, addCreditCard, deleteCreditCard,
   getLoans, addLoan, deleteLoan,
   getFriends, addFriend, deleteFriend,
-  getPartners, addPartner, deletePartner,
+  getFamilyMembers, addFamilyMember, deleteFamilyMember,
   getFriendsLedger, addFriendsLedgerEntry, deleteFriendsLedgerEntry,
-  getPartnersLedger, addPartnersLedgerEntry, deletePartnersLedgerEntry,
+  getFamilyLedger, addFamilyLedgerEntry, deleteFamilyLedgerEntry,
   getProperties, addProperty, deleteProperty,
 } from "@/lib/firestore"
 
@@ -322,49 +322,49 @@ describe("Firestore — Friends (Entity)", () => {
 })
 
 // ---------------------------------------------------------------------------
-// Partners (Entity)
+// Family Members (Entity)
 // ---------------------------------------------------------------------------
-describe("Firestore — Partners (Entity)", () => {
+describe("Firestore — Family Members (Entity)", () => {
   beforeEach(() => {
     mockDocs.clear()
     addDocCounter = 0
   })
 
-  it("addPartner returns an id", async () => {
-    const result = await addPartner({
+  it("addFamilyMember returns an id", async () => {
+    const result = await addFamilyMember({
       userId: "u1",
       name: "Priya Sharma",
-      company: "ABC Corp",
+      relationship: "wife",
       phone: "+911234567890",
-      email: "priya@abc.com",
+      email: "priya@home.com",
     })
     expect(result).toMatch(/^auto-id-/)
   })
 
-  it("getPartners decrypts PII", async () => {
-    mockDocs.set("partner-1", {
+  it("getFamilyMembers decrypts PII", async () => {
+    mockDocs.set("fm-1", {
       userId: "u1",
       name: "ENC(\"Priya Sharma\")",
-      company: "ENC(\"ABC Corp\")",
+      relationship: "wife",
       phone: "ENC(\"+911234567890\")",
-      email: "ENC(\"priya@abc.com\")",
+      email: "ENC(\"priya@home.com\")",
       _encrypted: true,
     })
-    const results = await getPartners("u1")
+    const results = await getFamilyMembers("u1")
     expect(results).toHaveLength(1)
-    expect(results[0].company).toBe("ABC Corp")
+    expect(results[0].name).toBe("Priya Sharma")
   })
 
-  it("deletePartner removes doc", async () => {
-    mockDocs.set("partner-1", {
+  it("deleteFamilyMember removes doc", async () => {
+    mockDocs.set("fm-1", {
       userId: "u1",
       name: "ENC(\"Priya Sharma\")",
-      company: "ENC(\"ABC Corp\")",
+      relationship: "wife",
       phone: "ENC(\"+911234567890\")",
-      email: "ENC(\"priya@abc.com\")",
+      email: "ENC(\"priya@home.com\")",
       _encrypted: true,
     })
-    await deletePartner("partner-1")
+    await deleteFamilyMember("fm-1")
     expect(mockDocs.size).toBe(0)
   })
 })
@@ -427,58 +427,58 @@ describe("Firestore — Friends Ledger", () => {
 })
 
 // ---------------------------------------------------------------------------
-// Partners Ledger
+// Family Ledger
 // ---------------------------------------------------------------------------
-describe("Firestore — Partners Ledger", () => {
+describe("Firestore — Family Ledger", () => {
   beforeEach(() => {
     mockDocs.clear()
     addDocCounter = 0
   })
 
-  it("addPartnersLedgerEntry returns an id", async () => {
-    const result = await addPartnersLedgerEntry({
+  it("addFamilyLedgerEntry returns an id", async () => {
+    const result = await addFamilyLedgerEntry({
       userId: "u1",
-      partnerId: "p1",
-      partnerName: "Priya",
+      familyMemberId: "fm1",
+      familyMemberName: "Priya",
       type: "shared",
       amount: 20000,
-      description: "Server costs",
+      description: "Grocery shopping",
       date: "2026-03-01",
       settled: false,
     })
     expect(result).toMatch(/^auto-id-/)
   })
 
-  it("getPartnersLedger decrypts sensitive fields", async () => {
-    mockDocs.set("pl-1", {
+  it("getFamilyLedger decrypts sensitive fields", async () => {
+    mockDocs.set("fl-1", {
       userId: "u1",
-      partnerId: "p1",
-      partnerName: "Priya",
+      familyMemberId: "fm1",
+      familyMemberName: "Priya",
       type: "shared",
       amount: "ENC(20000)",
-      description: "ENC(\"Server costs\")",
+      description: "ENC(\"Grocery shopping\")",
       date: "2026-03-01",
       settled: false,
       _encrypted: true,
     })
-    const results = await getPartnersLedger("u1")
+    const results = await getFamilyLedger("u1")
     expect(results).toHaveLength(1)
     expect(results[0].amount).toBe(20000)
   })
 
-  it("deletePartnersLedgerEntry removes doc", async () => {
-    mockDocs.set("pl-1", {
+  it("deleteFamilyLedgerEntry removes doc", async () => {
+    mockDocs.set("fl-1", {
       userId: "u1",
-      partnerId: "p1",
-      partnerName: "Priya",
+      familyMemberId: "fm1",
+      familyMemberName: "Priya",
       type: "shared",
       amount: "ENC(20000)",
-      description: "ENC(\"Server costs\")",
+      description: "ENC(\"Grocery shopping\")",
       date: "2026-03-01",
       settled: false,
       _encrypted: true,
     })
-    await deletePartnersLedgerEntry("pl-1")
+    await deleteFamilyLedgerEntry("fl-1")
     expect(mockDocs.size).toBe(0)
   })
 })
