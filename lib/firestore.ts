@@ -749,3 +749,45 @@ export async function updateProperty(
 export async function deleteProperty(id: string): Promise<void> {
   await deleteDoc(doc(db, "properties", id))
 }
+
+// ---------------------------------------------------------------------------
+// Custom Categories
+// ---------------------------------------------------------------------------
+
+export async function getCustomCategories(
+  userId: string,
+  group?: import("@/types").CategoryGroup,
+): Promise<import("@/types").CustomCategory[]> {
+  let q
+  if (group) {
+    q = query(
+      collection(db, "custom_categories"),
+      where("userId", "==", userId),
+      where("group", "==", group),
+    )
+  } else {
+    q = query(
+      collection(db, "custom_categories"),
+      where("userId", "==", userId),
+    )
+  }
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map((snap) => ({
+    id: snap.id,
+    ...snap.data(),
+  })) as import("@/types").CustomCategory[]
+}
+
+export async function addCustomCategory(
+  data: Omit<import("@/types").CustomCategory, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload: Record<string, unknown> = { ...data }
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "custom_categories"), payload)
+  return ref.id
+}
+
+export async function deleteCustomCategory(id: string): Promise<void> {
+  await deleteDoc(doc(db, "custom_categories", id))
+}

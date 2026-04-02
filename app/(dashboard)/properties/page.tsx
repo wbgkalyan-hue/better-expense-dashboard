@@ -16,6 +16,8 @@ import {
   PROPERTY_TYPE_LABELS, PROPERTY_CATEGORY_LABELS,
   type PropertyType, type PropertyCategory
 } from "@/types"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
@@ -124,14 +126,13 @@ export default function PropertiesPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label>Category</Label>
-                  <Select value={formCategory} onValueChange={v => setFormCategory(v as PropertyCategory)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(PROPERTY_CATEGORY_LABELS).map(([v, l]) => (
-                        <SelectItem key={v} value={v}>{l}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CategorySelect
+                    group="property_category"
+                    options={labelMapToOptions(PROPERTY_CATEGORY_LABELS)}
+                    value={formCategory}
+                    onValueChange={(v) => setFormCategory(v as PropertyCategory)}
+                    placeholder="Select category"
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -157,7 +158,7 @@ export default function PropertiesPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="grid gap-2">
                   <Label>Purchase Date</Label>
-                  <Input type="date" value={formPurchaseDate} onChange={e => setFormPurchaseDate(e.target.value)} />
+                  <DatePicker value={formPurchaseDate} onChange={setFormPurchaseDate} placeholder="Pick a date" />
                 </div>
                 <div className="grid gap-2">
                   <Label>Notes</Label>

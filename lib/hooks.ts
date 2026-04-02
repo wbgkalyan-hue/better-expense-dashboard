@@ -208,3 +208,10 @@ export function useProperties() {
     [],
   )
 }
+
+export function useCustomCategories(group?: import("@/types").CategoryGroup) {
+  return useFirestore<import("@/types").CustomCategory[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getCustomCategories(uid, group)),
+    [],
+  )
+}

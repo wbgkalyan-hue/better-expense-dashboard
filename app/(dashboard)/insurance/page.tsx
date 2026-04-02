@@ -13,6 +13,8 @@ import { useAuth } from "@/lib/auth-context"
 import { useInsurancePolicies } from "@/lib/hooks"
 import { addInsurancePolicy } from "@/lib/firestore"
 import { INSURANCE_TYPE_LABELS, INSURANCE_FREQUENCY_LABELS, type InsuranceType, type InsuranceFrequency } from "@/types"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
@@ -111,14 +113,13 @@ export default function InsurancePage() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="grid gap-2">
                   <Label>Type</Label>
-                  <Select value={formType} onValueChange={v => setFormType(v as InsuranceType)}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(INSURANCE_TYPE_LABELS).map(([v, l]) => (
-                        <SelectItem key={v} value={v}>{l}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CategorySelect
+                    group="insurance_type"
+                    options={labelMapToOptions(INSURANCE_TYPE_LABELS)}
+                    value={formType}
+                    onValueChange={(v) => setFormType(v as InsuranceType)}
+                    placeholder="Select type"
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label>Policy Number</Label>
@@ -149,11 +150,11 @@ export default function InsurancePage() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="grid gap-2">
                   <Label>Start Date</Label>
-                  <Input type="date" value={formStartDate} onChange={e => setFormStartDate(e.target.value)} />
+                  <DatePicker value={formStartDate} onChange={setFormStartDate} />
                 </div>
                 <div className="grid gap-2">
                   <Label>End Date</Label>
-                  <Input type="date" value={formEndDate} onChange={e => setFormEndDate(e.target.value)} />
+                  <DatePicker value={formEndDate} onChange={setFormEndDate} placeholder="Optional" />
                 </div>
               </div>
             </div>

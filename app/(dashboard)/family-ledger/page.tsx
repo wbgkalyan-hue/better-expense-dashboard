@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth-context"
 import { useFamilyLedger, useFamilyMembers } from "@/lib/hooks"
 import { addFamilyLedgerEntry, updateFamilyLedgerEntry } from "@/lib/firestore"
 import { FAMILY_LEDGER_TYPE_LABELS, type FamilyLedgerType } from "@/types"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
@@ -133,7 +134,7 @@ export default function FamilyLedgerPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Date</Label>
-                <Input type="date" value={formDate} onChange={e => setFormDate(e.target.value)} />
+                <DatePicker value={formDate} onChange={setFormDate} />
               </div>
             </div>
             <DialogFooter>

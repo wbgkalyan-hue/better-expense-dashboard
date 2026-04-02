@@ -16,6 +16,7 @@ import {
   FAMILY_RELATIONSHIP_LABELS,
   PROPERTY_TYPE_LABELS,
   PROPERTY_CATEGORY_LABELS,
+  CATEGORY_GROUP_LABELS,
 } from "@/types"
 
 describe("RE Investment Types — label completeness", () => {
@@ -220,5 +221,73 @@ describe("Type shape validation — FriendsLedgerEntry", () => {
     }
     expect(entry.settled).toBe(false)
     expect(entry.amount).toBeGreaterThan(0)
+  })
+})
+
+describe("Category Group Labels — completeness", () => {
+  const expected = [
+    "expense_category",
+    "income_category",
+    "bank_account_type",
+    "asset_type",
+    "insurance_type",
+    "loan_type",
+    "re_investment_type",
+    "property_category",
+    "friend_relationship",
+    "family_relationship",
+  ]
+
+  it("has a label for every category group", () => {
+    for (const key of expected) {
+      expect(CATEGORY_GROUP_LABELS[key as keyof typeof CATEGORY_GROUP_LABELS]).toBeDefined()
+    }
+  })
+
+  it("covers exactly the expected keys", () => {
+    expect(Object.keys(CATEGORY_GROUP_LABELS).sort()).toEqual(expected.sort())
+  })
+
+  it("no label is empty", () => {
+    for (const val of Object.values(CATEGORY_GROUP_LABELS)) {
+      expect(typeof val).toBe("string")
+      expect(val.length).toBeGreaterThan(0)
+    }
+  })
+})
+
+describe("Type shape validation — CustomCategory", () => {
+  it("satisfies required field contract at runtime", () => {
+    const obj = {
+      id: "cc-1",
+      userId: "u1",
+      group: "expense_category" as const,
+      label: "Pet Supplies",
+      value: "pet_supplies",
+      createdAt: "2026-03-01",
+      updatedAt: "2026-03-01",
+    }
+    expect(obj.group).toBe("expense_category")
+    expect(obj.label).toBe("Pet Supplies")
+    expect(obj.value).toBe("pet_supplies")
+    expect(typeof obj.id).toBe("string")
+    expect(typeof obj.userId).toBe("string")
+  })
+
+  it("widened entity types accept custom string values", () => {
+    // Transaction category accepts custom values
+    const tx = {
+      id: "t1",
+      userId: "u1",
+      amount: 100,
+      type: "expense" as const,
+      category: "pet_supplies", // custom value, not an enum member
+      description: "Dog food",
+      date: "2026-03-01",
+      source: "manual" as const,
+      createdAt: "2026-03-01",
+      updatedAt: "2026-03-01",
+    }
+    expect(tx.category).toBe("pet_supplies")
   })
 })

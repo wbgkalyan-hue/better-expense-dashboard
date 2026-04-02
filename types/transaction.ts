@@ -8,7 +8,7 @@ export interface Transaction {
   userId: string
   amount: number
   type: TransactionType
-  category: ExpenseCategory | IncomeCategory
+  category: ExpenseCategory | IncomeCategory | (string & {})
   description: string
   merchant?: string
   date: string // ISO 8601
@@ -20,7 +20,7 @@ export interface Transaction {
 
 export interface TransactionFilters {
   type?: TransactionType
-  category?: ExpenseCategory | IncomeCategory
+  category?: ExpenseCategory | IncomeCategory | (string & {})
   startDate?: string
   endDate?: string
   minAmount?: number

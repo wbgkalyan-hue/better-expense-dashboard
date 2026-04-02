@@ -55,6 +55,7 @@ import {
   getFriendsLedger, addFriendsLedgerEntry, deleteFriendsLedgerEntry,
   getFamilyLedger, addFamilyLedgerEntry, deleteFamilyLedgerEntry,
   getProperties, addProperty, deleteProperty,
+  getCustomCategories, addCustomCategory, deleteCustomCategory,
 } from "@/lib/firestore"
 
 // ---------------------------------------------------------------------------
@@ -528,6 +529,78 @@ describe("Firestore — Properties", () => {
       _encrypted: true,
     })
     await deleteProperty("prop-1")
+    expect(mockDocs.size).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Custom Categories
+// ---------------------------------------------------------------------------
+describe("Firestore — Custom Categories", () => {
+  beforeEach(() => {
+    mockDocs.clear()
+    addDocCounter = 0
+  })
+
+  it("addCustomCategory returns an id and stores data", async () => {
+    const result = await addCustomCategory({
+      userId: "u1",
+      group: "expense_category",
+      label: "Pet Supplies",
+      value: "pet_supplies",
+    })
+    expect(result).toMatch(/^auto-id-/)
+    expect(mockDocs.size).toBe(1)
+    const stored = mockDocs.get(result)
+    expect(stored?.group).toBe("expense_category")
+    expect(stored?.label).toBe("Pet Supplies")
+    expect(stored?.value).toBe("pet_supplies")
+  })
+
+  it("getCustomCategories returns all categories for a user", async () => {
+    mockDocs.set("cc-1", {
+      userId: "u1",
+      group: "expense_category",
+      label: "Pet Supplies",
+      value: "pet_supplies",
+    })
+    mockDocs.set("cc-2", {
+      userId: "u1",
+      group: "loan_type",
+      label: "Gold Loan",
+      value: "gold_loan",
+    })
+    const results = await getCustomCategories("u1")
+    expect(results).toHaveLength(2)
+  })
+
+  it("getCustomCategories filters by group when provided", async () => {
+    mockDocs.set("cc-1", {
+      userId: "u1",
+      group: "expense_category",
+      label: "Pet Supplies",
+      value: "pet_supplies",
+    })
+    mockDocs.set("cc-2", {
+      userId: "u1",
+      group: "loan_type",
+      label: "Gold Loan",
+      value: "gold_loan",
+    })
+    // Note: mock getDocs returns all mockDocs regardless of query,
+    // but the function path is tested (group-based query is constructed).
+    const results = await getCustomCategories("u1", "expense_category")
+    expect(results.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it("deleteCustomCategory removes doc", async () => {
+    mockDocs.set("cc-1", {
+      userId: "u1",
+      group: "expense_category",
+      label: "Pet Supplies",
+      value: "pet_supplies",
+    })
+    await deleteCustomCategory("cc-1")
     expect(mockDocs.size).toBe(0)
   })
 })

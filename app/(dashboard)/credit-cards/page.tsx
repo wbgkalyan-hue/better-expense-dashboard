@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label"
 import { useAuth } from "@/lib/auth-context"
 import { useCreditCards } from "@/lib/hooks"
 import { addCreditCard } from "@/lib/firestore"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
@@ -126,7 +127,7 @@ export default function CreditCardsPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label>Due Date</Label>
-                  <Input type="date" value={formDueDate} onChange={e => setFormDueDate(e.target.value)} />
+                  <DatePicker value={formDueDate} onChange={setFormDueDate} placeholder="Pick due date" />
                 </div>
               </div>
               <div className="grid gap-2">

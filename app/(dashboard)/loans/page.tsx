@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/lib/auth-context"
 import { useLoans } from "@/lib/hooks"
 import { addLoan } from "@/lib/firestore"
 import { LOAN_TYPE_LABELS, type LoanType } from "@/types"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
@@ -103,14 +104,13 @@ export default function LoansPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Type</Label>
-                <Select value={formType} onValueChange={v => setFormType(v as LoanType)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(LOAN_TYPE_LABELS).map(([v, l]) => (
-                      <SelectItem key={v} value={v}>{l}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="loan_type"
+                  options={labelMapToOptions(LOAN_TYPE_LABELS)}
+                  value={formType}
+                  onValueChange={(v) => setFormType(v as LoanType)}
+                  placeholder="Select type"
+                />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="grid gap-2">
@@ -135,11 +135,11 @@ export default function LoansPage() {
               <div className="grid grid-cols-2 gap-2">
                 <div className="grid gap-2">
                   <Label>Start Date</Label>
-                  <Input type="date" value={formStartDate} onChange={e => setFormStartDate(e.target.value)} />
+                  <DatePicker value={formStartDate} onChange={setFormStartDate} />
                 </div>
                 <div className="grid gap-2">
                   <Label>End Date</Label>
-                  <Input type="date" value={formEndDate} onChange={e => setFormEndDate(e.target.value)} />
+                  <DatePicker value={formEndDate} onChange={setFormEndDate} placeholder="Optional" />
                 </div>
               </div>
             </div>

@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/lib/auth-context"
 import { useFriends } from "@/lib/hooks"
 import { addFriend } from "@/lib/firestore"
 import { FRIEND_RELATIONSHIP_LABELS } from "@/types"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
 import { toast } from "sonner"
 
 export default function EntityFriendsPage() {
@@ -89,14 +89,13 @@ export default function EntityFriendsPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Relationship</Label>
-                <Select value={formRelationship} onValueChange={setFormRelationship}>
-                  <SelectTrigger><SelectValue placeholder="Select relationship" /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(FRIEND_RELATIONSHIP_LABELS).map(([v, l]) => (
-                      <SelectItem key={v} value={v}>{l}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="friend_relationship"
+                  options={labelMapToOptions(FRIEND_RELATIONSHIP_LABELS)}
+                  value={formRelationship}
+                  onValueChange={setFormRelationship}
+                  placeholder="Select relationship"
+                />
               </div>
               <div className="grid gap-2">
                 <Label>Phone</Label>

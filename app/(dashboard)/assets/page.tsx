@@ -21,19 +21,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAssets } from "@/lib/hooks"
 import { useAuth } from "@/lib/auth-context"
 import { addAsset, deleteAsset } from "@/lib/firestore"
 import { AssetType, ASSET_TYPE_LABELS } from "@/types/categories"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number): string {
@@ -154,14 +149,13 @@ export default function AssetsPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Type</Label>
-                <Select value={formType} onValueChange={setFormType}>
-                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(ASSET_TYPE_LABELS).map(([val, label]) => (
-                      <SelectItem key={val} value={val}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="asset_type"
+                  options={labelMapToOptions(ASSET_TYPE_LABELS)}
+                  value={formType}
+                  onValueChange={setFormType}
+                  placeholder="Select type"
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
@@ -175,7 +169,7 @@ export default function AssetsPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Purchase Date — optional</Label>
-                <Input type="date" value={formPurchaseDate} onChange={(e) => setFormPurchaseDate(e.target.value)} />
+                <DatePicker value={formPurchaseDate} onChange={setFormPurchaseDate} placeholder="Pick a date" />
               </div>
               <div className="grid gap-2">
                 <Label>Description — optional</Label>

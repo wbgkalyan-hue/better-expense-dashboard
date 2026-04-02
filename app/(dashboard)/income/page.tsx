@@ -29,19 +29,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useTransactions } from "@/lib/hooks"
 import { useAuth } from "@/lib/auth-context"
 import { addTransaction } from "@/lib/firestore"
 import { IncomeCategory, INCOME_CATEGORY_LABELS } from "@/types/categories"
+import { CategorySelect, labelMapToOptions, getCategoryLabel } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number): string {
@@ -159,18 +154,17 @@ export default function IncomePage() {
               </div>
               <div className="grid gap-2">
                 <Label>Category</Label>
-                <Select value={formCategory} onValueChange={setFormCategory}>
-                  <SelectTrigger><SelectValue placeholder="Select category" /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(INCOME_CATEGORY_LABELS).map(([val, label]) => (
-                      <SelectItem key={val} value={val}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="income_category"
+                  options={labelMapToOptions(INCOME_CATEGORY_LABELS)}
+                  value={formCategory}
+                  onValueChange={setFormCategory}
+                  placeholder="Select category"
+                />
               </div>
               <div className="grid gap-2">
                 <Label>Date</Label>
-                <Input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} />
+                <DatePicker value={formDate} onChange={setFormDate} />
               </div>
             </div>
             <DialogFooter>

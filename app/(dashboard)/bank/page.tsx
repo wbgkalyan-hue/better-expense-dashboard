@@ -21,19 +21,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useBankAccounts } from "@/lib/hooks"
 import { useAuth } from "@/lib/auth-context"
 import { addBankAccount, deleteBankAccount } from "@/lib/firestore"
 import { BankAccountType, BANK_ACCOUNT_TYPE_LABELS } from "@/types/categories"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number): string {
@@ -159,14 +154,13 @@ export default function BankPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Account Type</Label>
-                <Select value={formType} onValueChange={setFormType}>
-                  <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(BANK_ACCOUNT_TYPE_LABELS).map(([val, label]) => (
-                      <SelectItem key={val} value={val}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="bank_account_type"
+                  options={labelMapToOptions(BANK_ACCOUNT_TYPE_LABELS)}
+                  value={formType}
+                  onValueChange={setFormType}
+                  placeholder="Select type"
+                />
               </div>
               <div className="grid gap-2">
                 <Label>Balance (₹)</Label>
@@ -179,7 +173,7 @@ export default function BankPage() {
               {(formType === "fd" || formType === "rd") && (
                 <div className="grid gap-2">
                   <Label>Maturity Date</Label>
-                  <Input type="date" value={formMaturityDate} onChange={(e) => setFormMaturityDate(e.target.value)} />
+                  <DatePicker value={formMaturityDate} onChange={setFormMaturityDate} />
                 </div>
               )}
             </div>

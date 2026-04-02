@@ -13,6 +13,7 @@ import { useAuth } from "@/lib/auth-context"
 import { useFriendsLedger, useFriends } from "@/lib/hooks"
 import { addFriendsLedgerEntry, updateFriendsLedgerEntry } from "@/lib/firestore"
 import { LEDGER_ENTRY_TYPE_LABELS, type LedgerEntryType } from "@/types"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
@@ -133,7 +134,7 @@ export default function FriendsLedgerPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Date</Label>
-                <Input type="date" value={formDate} onChange={e => setFormDate(e.target.value)} />
+                <DatePicker value={formDate} onChange={setFormDate} />
               </div>
             </div>
             <DialogFooter>

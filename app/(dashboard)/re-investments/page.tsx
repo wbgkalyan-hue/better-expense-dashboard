@@ -13,6 +13,8 @@ import { useAuth } from "@/lib/auth-context"
 import { useRealEstateInvestments } from "@/lib/hooks"
 import { addRealEstateInvestment } from "@/lib/firestore"
 import { RE_INVESTMENT_TYPE_LABELS, type RealEstateInvestmentType } from "@/types"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 function formatCurrency(amount: number) {
@@ -100,14 +102,13 @@ export default function ReInvestmentsPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Type</Label>
-                <Select value={formType} onValueChange={v => setFormType(v as RealEstateInvestmentType)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(RE_INVESTMENT_TYPE_LABELS).map(([v, l]) => (
-                      <SelectItem key={v} value={v}>{l}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="re_investment_type"
+                  options={labelMapToOptions(RE_INVESTMENT_TYPE_LABELS)}
+                  value={formType}
+                  onValueChange={(v) => setFormType(v as RealEstateInvestmentType)}
+                  placeholder="Select type"
+                />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div className="grid gap-2">
@@ -126,7 +127,7 @@ export default function ReInvestmentsPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label>Purchase Date</Label>
-                  <Input type="date" value={formPurchaseDate} onChange={e => setFormPurchaseDate(e.target.value)} />
+                  <DatePicker value={formPurchaseDate} onChange={setFormPurchaseDate} />
                 </div>
               </div>
               <div className="grid gap-2">

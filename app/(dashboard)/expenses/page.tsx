@@ -58,6 +58,8 @@ import {
 import { useTransactions } from "@/lib/hooks"
 import { useAuth } from "@/lib/auth-context"
 import { addTransaction } from "@/lib/firestore"
+import { CategorySelect, labelMapToOptions, getCategoryLabel } from "@/components/ui/category-select"
+import { DatePicker } from "@/components/ui/date-picker"
 import { toast } from "sonner"
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -250,20 +252,13 @@ export default function ExpensesPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="category">Category</Label>
-                <Select value={formCategory} onValueChange={setFormCategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(EXPENSE_CATEGORY_LABELS).map(
-                      ([value, label]) => (
-                        <SelectItem key={value} value={value}>
-                          {label}
-                        </SelectItem>
-                      ),
-                    )}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="expense_category"
+                  options={labelMapToOptions(EXPENSE_CATEGORY_LABELS)}
+                  value={formCategory}
+                  onValueChange={setFormCategory}
+                  placeholder="Select category"
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="merchant">Merchant</Label>
@@ -271,7 +266,7 @@ export default function ExpensesPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="date">Date</Label>
-                <Input id="date" type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} />
+                <DatePicker value={formDate} onChange={setFormDate} />
               </div>
             </div>
             <DialogFooter>

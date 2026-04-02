@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useAuth } from "@/lib/auth-context"
 import { useFamilyMembers } from "@/lib/hooks"
 import { addFamilyMember } from "@/lib/firestore"
 import { FAMILY_RELATIONSHIP_LABELS } from "@/types"
+import { CategorySelect, labelMapToOptions } from "@/components/ui/category-select"
 import { toast } from "sonner"
 
 export default function EntityFamilyPage() {
@@ -86,14 +86,13 @@ export default function EntityFamilyPage() {
               </div>
               <div className="grid gap-2">
                 <Label>Relationship</Label>
-                <Select value={formRelationship} onValueChange={setFormRelationship}>
-                  <SelectTrigger><SelectValue placeholder="Select relationship" /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(FAMILY_RELATIONSHIP_LABELS).map(([v, l]) => (
-                      <SelectItem key={v} value={v}>{l}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <CategorySelect
+                  group="family_relationship"
+                  options={labelMapToOptions(FAMILY_RELATIONSHIP_LABELS)}
+                  value={formRelationship}
+                  onValueChange={setFormRelationship}
+                  placeholder="Select relationship"
+                />
               </div>
               <div className="grid gap-2">
                 <Label>Phone</Label>
