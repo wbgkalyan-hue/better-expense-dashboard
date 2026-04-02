@@ -240,7 +240,7 @@ export default function AssetsPage() {
                   </p>
                   <div className="mt-2 flex items-center gap-2">
                     <Badge className={TYPE_COLORS[asset.type] || TYPE_COLORS.other}>
-                      {ASSET_TYPE_LABELS[asset.type]}
+                      {(ASSET_TYPE_LABELS as Record<string, string>)[asset.type] ?? asset.type}
                     </Badge>
                     <span className={`text-xs font-medium ${change >= 0 ? "text-green-600" : "text-red-500"}`}>
                       {change >= 0 ? "+" : ""}{changePercent}%

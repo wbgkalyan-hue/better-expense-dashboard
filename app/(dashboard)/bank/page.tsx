@@ -249,7 +249,7 @@ export default function BankPage() {
                 <div className="text-2xl font-bold">{formatCurrency(account.balance)}</div>
                 <div className="mt-2 flex items-center gap-2">
                   <Badge className={TYPE_COLORS[account.type] || TYPE_COLORS.other}>
-                    {BANK_ACCOUNT_TYPE_LABELS[account.type]}
+                    {(BANK_ACCOUNT_TYPE_LABELS as Record<string, string>)[account.type] ?? account.type}
                   </Badge>
                   {account.interestRate && (
                     <span className="text-xs text-muted-foreground">{account.interestRate}% p.a.</span>

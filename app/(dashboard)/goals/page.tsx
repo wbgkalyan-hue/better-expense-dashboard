@@ -144,7 +144,7 @@ export default function GoalsPage() {
       name: g.title,
       target: g.targetAmount,
       saved: g.currentAmount,
-      fill: GOAL_TYPE_COLORS[g.type] ?? "oklch(0.7 0.1 45)",
+      fill: (GOAL_TYPE_COLORS as Record<string, string>)[g.type] ?? "oklch(0.7 0.1 45)",
     }))
 
   const allocConfig: ChartConfig = {
@@ -378,7 +378,7 @@ export default function GoalsPage() {
         </h2>
         <div className="space-y-4">
           {goalsWithProgress.map((goal) => {
-            const Icon = GOAL_TYPE_ICONS[goal.type] ?? Target
+            const Icon = (GOAL_TYPE_ICONS as Record<string, React.ElementType>)[goal.type] ?? Target
             return (
               <Card
                 key={goal.id}
@@ -401,7 +401,7 @@ export default function GoalsPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-semibold">{goal.title}</h3>
                         <Badge variant="secondary">
-                          {GOAL_TYPE_LABELS[goal.type]}
+                          {(GOAL_TYPE_LABELS as Record<string, string>)[goal.type] ?? goal.type}
                         </Badge>
                         {goal.deductsFromNetworth && (
                           <Badge variant="outline" className="text-xs">

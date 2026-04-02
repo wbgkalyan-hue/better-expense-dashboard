@@ -3,9 +3,9 @@
  */
 import { webcrypto } from "node:crypto"
 
-// @ts-expect-error - Polyfill for Node.js < 20
+// @ts-ignore - Polyfill for Node.js < 20
 if (!globalThis.crypto?.subtle) {
-  // @ts-expect-error - crypto polyfill
+  // @ts-ignore - crypto polyfill
   globalThis.crypto = webcrypto
 }
 

@@ -69,7 +69,7 @@ export function useBrokerAccounts() {
 
 export function useInvestmentTransactions(brokerAccountId?: string) {
   const { user, encryptionReady } = useAuth()
-  const [state, setState] = useState<QueryState<InvestmentTransaction[]>>({
+  const [state, setState] = useState<Omit<QueryState<InvestmentTransaction[]>, "refetch">>({
     data: [],
     loading: true,
     error: null,
@@ -107,7 +107,7 @@ export function useNetworthSnapshots() {
 }
 
 export function useBrokerAccount(id: string) {
-  const [state, setState] = useState<QueryState<BrokerAccount | null>>({
+  const [state, setState] = useState<Omit<QueryState<BrokerAccount | null>, "refetch">>({
     data: null,
     loading: true,
     error: null,

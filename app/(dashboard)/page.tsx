@@ -461,7 +461,7 @@ export default function DashboardPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{goal.title}</span>
                         <Badge variant="secondary" className="text-xs">
-                          {GOAL_TYPE_LABELS[goal.type] ?? goal.type}
+                          {(GOAL_TYPE_LABELS as Record<string, string>)[goal.type] ?? goal.type}
                         </Badge>
                       </div>
                       <span className="text-muted-foreground">{percent}%</span>
