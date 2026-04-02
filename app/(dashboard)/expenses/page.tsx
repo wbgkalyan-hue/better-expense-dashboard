@@ -100,7 +100,7 @@ const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 export default function ExpensesPage() {
   const { user } = useAuth()
-  const { data: transactions, loading } = useTransactions()
+  const { data: transactions, loading, refetch } = useTransactions()
   const [search, setSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -193,8 +193,7 @@ export default function ExpensesPage() {
       setFormDescription("")
       setFormCategory("")
       setFormMerchant("")
-      // Reload
-      window.location.reload()
+      refetch()
     } catch (err) {
       toast.error("Failed to add expense")
     } finally {

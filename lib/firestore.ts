@@ -361,3 +361,391 @@ export async function getNetworthSnapshots(
     .filter((r): r is NetworthSnapshot => r !== null)
     .sort((a, b) => b.date.localeCompare(a.date))
 }
+
+// ---------------------------------------------------------------------------
+// Real Estate Investments
+// ---------------------------------------------------------------------------
+
+const RE_INVESTMENT_SENSITIVE = ["purchasePrice", "currentValue", "monthlyRent", "notes"]
+
+export async function getRealEstateInvestments(userId: string): Promise<import("@/types").RealEstateInvestment[]> {
+  const q = query(collection(db, "re_investments"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").RealEstateInvestment>(raw, RE_INVESTMENT_SENSITIVE)
+    }),
+  )
+  return results
+    .filter((r): r is import("@/types").RealEstateInvestment => r !== null)
+    .sort((a, b) => b.purchaseDate.localeCompare(a.purchaseDate))
+}
+
+export async function addRealEstateInvestment(
+  data: Omit<import("@/types").RealEstateInvestment, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, RE_INVESTMENT_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "re_investments"), payload)
+  return ref.id
+}
+
+export async function updateRealEstateInvestment(
+  id: string,
+  data: Partial<import("@/types").RealEstateInvestment>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, RE_INVESTMENT_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "re_investments", id), payload)
+}
+
+export async function deleteRealEstateInvestment(id: string): Promise<void> {
+  await deleteDoc(doc(db, "re_investments", id))
+}
+
+// ---------------------------------------------------------------------------
+// Insurance Policies
+// ---------------------------------------------------------------------------
+
+const INSURANCE_SENSITIVE = ["policyNumber", "premium", "coverageAmount"]
+
+export async function getInsurancePolicies(userId: string): Promise<import("@/types").InsurancePolicy[]> {
+  const q = query(collection(db, "insurance_policies"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").InsurancePolicy>(raw, INSURANCE_SENSITIVE)
+    }),
+  )
+  return results
+    .filter((r): r is import("@/types").InsurancePolicy => r !== null)
+    .sort((a, b) => b.startDate.localeCompare(a.startDate))
+}
+
+export async function addInsurancePolicy(
+  data: Omit<import("@/types").InsurancePolicy, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, INSURANCE_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "insurance_policies"), payload)
+  return ref.id
+}
+
+export async function updateInsurancePolicy(
+  id: string,
+  data: Partial<import("@/types").InsurancePolicy>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, INSURANCE_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "insurance_policies", id), payload)
+}
+
+export async function deleteInsurancePolicy(id: string): Promise<void> {
+  await deleteDoc(doc(db, "insurance_policies", id))
+}
+
+// ---------------------------------------------------------------------------
+// Credit Cards
+// ---------------------------------------------------------------------------
+
+const CREDIT_CARD_SENSITIVE = ["last4", "creditLimit", "outstandingBalance", "minPayment", "interestRate"]
+
+export async function getCreditCards(userId: string): Promise<import("@/types").CreditCard[]> {
+  const q = query(collection(db, "credit_cards"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").CreditCard>(raw, CREDIT_CARD_SENSITIVE)
+    }),
+  )
+  return results.filter((r): r is import("@/types").CreditCard => r !== null)
+}
+
+export async function addCreditCard(
+  data: Omit<import("@/types").CreditCard, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, CREDIT_CARD_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "credit_cards"), payload)
+  return ref.id
+}
+
+export async function updateCreditCard(
+  id: string,
+  data: Partial<import("@/types").CreditCard>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, CREDIT_CARD_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "credit_cards", id), payload)
+}
+
+export async function deleteCreditCard(id: string): Promise<void> {
+  await deleteDoc(doc(db, "credit_cards", id))
+}
+
+// ---------------------------------------------------------------------------
+// Loans
+// ---------------------------------------------------------------------------
+
+const LOAN_SENSITIVE = ["principalAmount", "outstandingAmount", "interestRate", "emiAmount"]
+
+export async function getLoans(userId: string): Promise<import("@/types").Loan[]> {
+  const q = query(collection(db, "loans"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").Loan>(raw, LOAN_SENSITIVE)
+    }),
+  )
+  return results
+    .filter((r): r is import("@/types").Loan => r !== null)
+    .sort((a, b) => b.startDate.localeCompare(a.startDate))
+}
+
+export async function addLoan(
+  data: Omit<import("@/types").Loan, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, LOAN_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "loans"), payload)
+  return ref.id
+}
+
+export async function updateLoan(
+  id: string,
+  data: Partial<import("@/types").Loan>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, LOAN_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "loans", id), payload)
+}
+
+export async function deleteLoan(id: string): Promise<void> {
+  await deleteDoc(doc(db, "loans", id))
+}
+
+// ---------------------------------------------------------------------------
+// Friends (Entity)
+// ---------------------------------------------------------------------------
+
+const FRIEND_SENSITIVE = ["name", "phone", "email"]
+
+export async function getFriends(userId: string): Promise<import("@/types").Friend[]> {
+  const q = query(collection(db, "friends"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").Friend>(raw, FRIEND_SENSITIVE)
+    }),
+  )
+  return results.filter((r): r is import("@/types").Friend => r !== null)
+}
+
+export async function addFriend(
+  data: Omit<import("@/types").Friend, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, FRIEND_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "friends"), payload)
+  return ref.id
+}
+
+export async function updateFriend(
+  id: string,
+  data: Partial<import("@/types").Friend>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, FRIEND_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "friends", id), payload)
+}
+
+export async function deleteFriend(id: string): Promise<void> {
+  await deleteDoc(doc(db, "friends", id))
+}
+
+// ---------------------------------------------------------------------------
+// Partners (Entity)
+// ---------------------------------------------------------------------------
+
+const PARTNER_SENSITIVE = ["name", "company", "phone", "email"]
+
+export async function getPartners(userId: string): Promise<import("@/types").Partner[]> {
+  const q = query(collection(db, "partners"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").Partner>(raw, PARTNER_SENSITIVE)
+    }),
+  )
+  return results.filter((r): r is import("@/types").Partner => r !== null)
+}
+
+export async function addPartner(
+  data: Omit<import("@/types").Partner, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, PARTNER_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "partners"), payload)
+  return ref.id
+}
+
+export async function updatePartner(
+  id: string,
+  data: Partial<import("@/types").Partner>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, PARTNER_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "partners", id), payload)
+}
+
+export async function deletePartner(id: string): Promise<void> {
+  await deleteDoc(doc(db, "partners", id))
+}
+
+// ---------------------------------------------------------------------------
+// Friends Ledger
+// ---------------------------------------------------------------------------
+
+const FRIENDS_LEDGER_SENSITIVE = ["amount", "description"]
+
+export async function getFriendsLedger(userId: string): Promise<import("@/types").FriendsLedgerEntry[]> {
+  const q = query(collection(db, "friends_ledger"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").FriendsLedgerEntry>(raw, FRIENDS_LEDGER_SENSITIVE)
+    }),
+  )
+  return results
+    .filter((r): r is import("@/types").FriendsLedgerEntry => r !== null)
+    .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+export async function addFriendsLedgerEntry(
+  data: Omit<import("@/types").FriendsLedgerEntry, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, FRIENDS_LEDGER_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "friends_ledger"), payload)
+  return ref.id
+}
+
+export async function updateFriendsLedgerEntry(
+  id: string,
+  data: Partial<import("@/types").FriendsLedgerEntry>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, FRIENDS_LEDGER_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "friends_ledger", id), payload)
+}
+
+export async function deleteFriendsLedgerEntry(id: string): Promise<void> {
+  await deleteDoc(doc(db, "friends_ledger", id))
+}
+
+// ---------------------------------------------------------------------------
+// Partners Ledger
+// ---------------------------------------------------------------------------
+
+const PARTNERS_LEDGER_SENSITIVE = ["amount", "description"]
+
+export async function getPartnersLedger(userId: string): Promise<import("@/types").PartnersLedgerEntry[]> {
+  const q = query(collection(db, "partners_ledger"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").PartnersLedgerEntry>(raw, PARTNERS_LEDGER_SENSITIVE)
+    }),
+  )
+  return results
+    .filter((r): r is import("@/types").PartnersLedgerEntry => r !== null)
+    .sort((a, b) => b.date.localeCompare(a.date))
+}
+
+export async function addPartnersLedgerEntry(
+  data: Omit<import("@/types").PartnersLedgerEntry, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, PARTNERS_LEDGER_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "partners_ledger"), payload)
+  return ref.id
+}
+
+export async function updatePartnersLedgerEntry(
+  id: string,
+  data: Partial<import("@/types").PartnersLedgerEntry>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, PARTNERS_LEDGER_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "partners_ledger", id), payload)
+}
+
+export async function deletePartnersLedgerEntry(id: string): Promise<void> {
+  await deleteDoc(doc(db, "partners_ledger", id))
+}
+
+// ---------------------------------------------------------------------------
+// Properties
+// ---------------------------------------------------------------------------
+
+const PROPERTY_SENSITIVE = ["address", "currentValue", "purchasePrice", "monthlyRent", "monthlyEmi"]
+
+export async function getProperties(userId: string): Promise<import("@/types").Property[]> {
+  const q = query(collection(db, "properties"), where("userId", "==", userId))
+  const snapshot = await getDocs(q)
+  const results = await Promise.all(
+    snapshot.docs.map(async (snap) => {
+      const raw = { id: snap.id, ...snap.data() }
+      return decryptDoc<import("@/types").Property>(raw, PROPERTY_SENSITIVE)
+    }),
+  )
+  return results.filter((r): r is import("@/types").Property => r !== null)
+}
+
+export async function addProperty(
+  data: Omit<import("@/types").Property, "id" | "createdAt" | "updatedAt">,
+): Promise<string> {
+  const payload = await encryptDoc({ ...data }, PROPERTY_SENSITIVE)
+  payload.createdAt = serverTimestamp()
+  payload.updatedAt = serverTimestamp()
+  const ref = await addDoc(collection(db, "properties"), payload)
+  return ref.id
+}
+
+export async function updateProperty(
+  id: string,
+  data: Partial<import("@/types").Property>,
+): Promise<void> {
+  const payload = await encryptDoc({ ...data }, PROPERTY_SENSITIVE)
+  payload.updatedAt = serverTimestamp()
+  if (isEncryptionReady()) payload._encrypted = true
+  await updateDoc(doc(db, "properties", id), payload)
+}
+
+export async function deleteProperty(id: string): Promise<void> {
+  await deleteDoc(doc(db, "properties", id))
+}

@@ -13,7 +13,19 @@ import {
   Settings,
   LogOut,
   ChevronUp,
+  ChevronDown,
+  Flag,
+  Building2,
+  Shield,
+  CreditCard,
+  Banknote,
+  Users,
+  Handshake,
+  UserRound,
+  Building,
+  LayoutDashboard,
 } from "lucide-react"
+import { useState } from "react"
 import { useAuth } from "@/lib/auth-context"
 import {
   Sidebar,
@@ -40,22 +52,78 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 
 const NAV_MAIN = [
-  { title: "Dashboard", href: "/", icon: Home },
-  { title: "Expenses", href: "/expenses", icon: Receipt },
-  { title: "Investments", href: "/investments", icon: TrendingUp },
-  { title: "Goals", href: "/goals", icon: Target },
+  { title: "Dashboard",    href: "/",            icon: Home },
+  { title: "Goals",        href: "/goals",       icon: Flag },
+  { title: "Accounts",     href: "/bank",        icon: Landmark },
+  { title: "Transactions", href: "/expenses",    icon: Receipt },
+  { title: "Investment",   href: "/investments", icon: TrendingUp },
+]
+
+const NAV_FINANCE = [
+  { title: "RE-Investments", href: "/re-investments", icon: Building2 },
+  { title: "Insurance",      href: "/insurance",      icon: Shield },
+  { title: "Credit Card",    href: "/credit-cards",   icon: CreditCard },
+  { title: "Loan",           href: "/loans",          icon: Banknote },
+]
+
+const NAV_SOCIAL = [
+  { title: "Friends Ledger",  href: "/friends-ledger",  icon: Users },
+  { title: "Partners Ledger", href: "/partners-ledger", icon: Handshake },
+]
+
+const NAV_ENTITY = [
+  { title: "Friends",  href: "/entity/friends",  icon: UserRound },
+  { title: "Partners", href: "/entity/partners", icon: Handshake },
 ]
 
 const NAV_MORE = [
-  { title: "Income", href: "/income", icon: Wallet },
-  { title: "Bank", href: "/bank", icon: Landmark },
-  { title: "Assets", href: "/assets", icon: Package },
-  { title: "Settings", href: "/settings", icon: Settings },
+  { title: "Income",      href: "/income",    icon: Wallet },
+  { title: "Assets",      href: "/assets",    icon: Package },
+  { title: "Properties",  href: "/properties", icon: Building },
+  { title: "Settings",    href: "/settings",  icon: Settings },
 ]
+
+function NavGroup({
+  label,
+  items,
+  pathname,
+}: {
+  label: string
+  items: { title: string; href: string; icon: React.ElementType }[]
+  pathname: string
+}) {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.href}>
+              <SidebarMenuButton
+                asChild
+                isActive={
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname.startsWith(item.href)
+                }
+              >
+                <Link href={item.href}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  )
+}
 
 function AppSidebar() {
   const pathname = usePathname()
   const { user, signOut } = useAuth()
+  const [entityOpen, setEntityOpen] = useState(pathname.startsWith("/entity"))
 
   const initials = user?.displayName
     ? (user.displayName as string)
@@ -93,51 +161,45 @@ function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
+        <NavGroup label="Main" items={NAV_MAIN} pathname={pathname} />
+        <NavGroup label="Finance" items={NAV_FINANCE} pathname={pathname} />
+        <NavGroup label="Ledger" items={NAV_SOCIAL} pathname={pathname} />
+
+        {/* Entity — collapsible */}
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV_MAIN.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      item.href === "/"
-                        ? pathname === "/"
-                        : pathname.startsWith(item.href)
-                    }
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupLabel
+            className="flex cursor-pointer items-center justify-between"
+            onClick={() => setEntityOpen((o) => !o)}
+          >
+            <span>Entity</span>
+            {entityOpen ? (
+              <ChevronUp className="h-3 w-3" />
+            ) : (
+              <ChevronDown className="h-3 w-3" />
+            )}
+          </SidebarGroupLabel>
+          {entityOpen && (
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {NAV_ENTITY.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(item.href)}
+                    >
+                      <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          )}
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>More</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV_MORE.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith(item.href)}
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <NavGroup label="More" items={NAV_MORE} pathname={pathname} />
       </SidebarContent>
 
       <SidebarFooter>

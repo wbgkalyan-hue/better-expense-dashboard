@@ -24,6 +24,7 @@ interface QueryState<T> {
   data: T
   loading: boolean
   error: string | null
+  refetch: () => void
 }
 
 function useFirestore<T>(
@@ -31,38 +32,36 @@ function useFirestore<T>(
   defaultValue: T,
 ) {
   const { user, encryptionReady } = useAuth()
-  const [state, setState] = useState<QueryState<T>>({
+  const [state, setState] = useState<Omit<QueryState<T>, "refetch">>({
     data: defaultValue,
     loading: true,
     error: null,
   })
+
+  function load(uid: string) {
+    setState((s) => ({ ...s, loading: true, error: null }))
+    fetcher(uid)
+      .then((data) => setState({ data, loading: false, error: null }))
+      .catch((err) =>
+        setState({ data: defaultValue, loading: false, error: err.message }),
+      )
+  }
 
   useEffect(() => {
     if (!user) {
       setState({ data: defaultValue, loading: false, error: null })
       return
     }
-    let cancelled = false
-    setState((s) => ({ ...s, loading: true, error: null }))
-    fetcher(user.uid)
-      .then((data) => {
-        if (!cancelled) setState({ data, loading: false, error: null })
-      })
-      .catch((err) => {
-        if (!cancelled)
-          setState({ data: defaultValue, loading: false, error: err.message })
-      })
-    return () => {
-      cancelled = true
-    }
+    load(user.uid)
   }, [user, encryptionReady]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  return state
+  return { ...state, refetch: () => user && load(user.uid) }
 }
 
 export function useTransactions() {
   return useFirestore<Transaction[]>(getTransactions, [])
 }
+
 
 export function useBrokerAccounts() {
   return useFirestore<BrokerAccount[]>(getBrokerAccounts, [])
@@ -143,6 +142,69 @@ export function useBankAccounts() {
 export function useAssets() {
   return useFirestore<Asset[]>(
     (uid) => import("@/lib/firestore").then((m) => m.getAssets(uid)),
+    [],
+  )
+}
+
+export function useRealEstateInvestments() {
+  return useFirestore<import("@/types").RealEstateInvestment[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getRealEstateInvestments(uid)),
+    [],
+  )
+}
+
+export function useInsurancePolicies() {
+  return useFirestore<import("@/types").InsurancePolicy[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getInsurancePolicies(uid)),
+    [],
+  )
+}
+
+export function useCreditCards() {
+  return useFirestore<import("@/types").CreditCard[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getCreditCards(uid)),
+    [],
+  )
+}
+
+export function useLoans() {
+  return useFirestore<import("@/types").Loan[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getLoans(uid)),
+    [],
+  )
+}
+
+export function useFriends() {
+  return useFirestore<import("@/types").Friend[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getFriends(uid)),
+    [],
+  )
+}
+
+export function usePartners() {
+  return useFirestore<import("@/types").Partner[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getPartners(uid)),
+    [],
+  )
+}
+
+export function useFriendsLedger() {
+  return useFirestore<import("@/types").FriendsLedgerEntry[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getFriendsLedger(uid)),
+    [],
+  )
+}
+
+export function usePartnersLedger() {
+  return useFirestore<import("@/types").PartnersLedgerEntry[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getPartnersLedger(uid)),
+    [],
+  )
+}
+
+export function useProperties() {
+  return useFirestore<import("@/types").Property[]>(
+    (uid) => import("@/lib/firestore").then((m) => m.getProperties(uid)),
     [],
   )
 }
